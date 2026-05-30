@@ -8,21 +8,72 @@
 
 import UIKit
 
+enum LearnFilter: CaseIterable {
+    case all
+    case notStarted
+    case completed
+}
+
+protocol LearnProgressProviding {
+    func ratingForSection(_ section: String) -> Int
+    func hasLearned(_ section: String) -> Bool
+    func hasReviewed(_ section: String) -> Bool
+}
+
+extension User: LearnProgressProviding { }
+
+protocol LearnDataSourceDelegate: AnyObject {
+    func startStudying(title: String)
+}
+
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
-    weak var delegate: LearnViewController?
+    weak var delegate: LearnDataSourceDelegate?
+    var filter = LearnFilter.all
+
+    private let chapters: [Chapter]
+    private let userProgress: () -> LearnProgressProviding
+
+    var displayedChapters: [Chapter] {
+        switch filter {
+        case .all:
+            return chapters
+        case .notStarted:
+            let progress = userProgress()
+            return filteredChapters { section in
+                let bundleName = section.bundleName
+                return progress.hasLearned(bundleName) == false && progress.hasReviewed(bundleName) == false
+            }
+        case .completed:
+            let progress = userProgress()
+            return filteredChapters { section in
+                let bundleName = section.bundleName
+                return progress.hasLearned(bundleName) && progress.hasReviewed(bundleName)
+            }
+        }
+    }
+
+    init(chapters: [Chapter] = Unwrap.chapters, userProgress: @escaping () -> LearnProgressProviding = { User.current }) {
+        self.chapters = chapters
+        self.userProgress = userProgress
+        super.init()
+    }
+
+    convenience init(chapters: [Chapter] = Unwrap.chapters, userProgress: LearnProgressProviding) {
+        self.init(chapters: chapters, userProgress: { userProgress })
+    }
 
     func title(for indexPath: IndexPath) -> String {
-        return Unwrap.chapters[indexPath.section].sections[indexPath.row]
+        return displayedChapters[indexPath.section].sections[indexPath.row]
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Unwrap.chapters.count
+        return displayedChapters.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SectionHeader") as? DynamicHeightHeaderView {
-            headerView.headerLabel.text = Unwrap.chapters[section].name
+            headerView.headerLabel.text = displayedChapters[section].name
             return headerView
         } else {
             return nil
@@ -30,14 +81,14 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Unwrap.chapters[section].sections.count
+        return displayedChapters[section].sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.accessoryType = .disclosureIndicator
 
-        let chapter = Unwrap.chapters[indexPath.section]
+        let chapter = displayedChapters[indexPath.section]
         let section = chapter.sections[indexPath.row]
 
         cell.textLabel?.text = section
@@ -45,7 +96,7 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
         // Decide how to show the checkmark for this section.
 
-        let score = User.current.ratingForSection(section.bundleName)
+        let score = userProgress().ratingForSection(section.bundleName)
 
         if score == 0 {
             // Always show a check image, but make it invisible
@@ -72,8 +123,20 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedChapter = Unwrap.chapters[indexPath.section]
+        let selectedChapter = displayedChapters[indexPath.section]
         let selectedSection = selectedChapter.sections[indexPath.row]
         delegate?.startStudying(title: selectedSection)
+    }
+
+    private func filteredChapters(includeSection: (String) -> Bool) -> [Chapter] {
+        return chapters.compactMap { chapter in
+            let sections = chapter.sections.filter(includeSection)
+
+            if sections.isEmpty {
+                return nil
+            } else {
+                return Chapter(name: chapter.name, sections: sections)
+            }
+        }
     }
 }
