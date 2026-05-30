@@ -46,6 +46,10 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
         return visibleChapters[indexPath.section].sections[indexPath.row]
     }
 
+    func title(for section: Int) -> String {
+        return visibleChapters[section].name
+    }
+
     func numberOfSections(in tableView: UITableView) -> Int {
         return visibleChapters.count
     }

@@ -193,6 +193,7 @@ class LearnDataSourceTests: XCTestCase {
 
         let header = dataSource.tableView(tableView, viewForHeaderInSection: 0) as? DynamicHeightHeaderView
         XCTAssertEqual(header?.headerLabel.text, "Collections")
+        XCTAssertEqual(dataSource.title(for: 0), "Collections")
         XCTAssertEqual(dataSource.title(for: IndexPath(row: 0, section: 0)), "Arrays")
     }
 
