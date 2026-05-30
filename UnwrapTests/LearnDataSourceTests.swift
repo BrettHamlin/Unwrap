@@ -145,6 +145,8 @@ class LearnDataSourceTests: XCTestCase {
     //harness:criterion=c-learn-user-status-changed-recomputes-filter
     func testUserStatusChangedRecomputesActiveFilter() throws {
         let viewController = makeLoadedViewController()
+        let trackingTableView = ReloadTrackingTableView(frame: .zero, style: .plain)
+        viewController.tableView = trackingTableView
         viewController.dataSource.filter = .notStarted
         let chapterToRemove = try XCTUnwrap(Unwrap.chapters.first)
 
@@ -152,6 +154,7 @@ class LearnDataSourceTests: XCTestCase {
         NotificationCenter.default.post(name: .userStatusChanged, object: nil)
 
         let expectedCount = expectedChapters(for: .notStarted).count
+        XCTAssertEqual(trackingTableView.reloadDataCallCount, 1)
         XCTAssertEqual(viewController.dataSource.numberOfSections(in: tableView), expectedCount)
         XCTAssertFalse(viewController.dataSource.filteredChapters.contains { $0.name == chapterToRemove.name })
     }
@@ -277,13 +280,10 @@ class LearnDataSourceTests: XCTestCase {
     }
 
     private func makeShiftedFirstVisibleSectionFixture() throws -> (expectedFirstVisibleChapter: String, expectedFirstVisibleSection: String) {
-        let targetChapterIndex = try XCTUnwrap(Unwrap.chapters.firstIndex { $0.sections.count > 1 })
+        let excludedChapter = try XCTUnwrap(Unwrap.chapters.first)
+        markLearned(excludedChapter.sections)
 
-        for chapter in Unwrap.chapters[..<targetChapterIndex] {
-            markLearned(chapter.sections)
-        }
-
-        let targetChapter = Unwrap.chapters[targetChapterIndex]
+        let targetChapter = try XCTUnwrap(Unwrap.chapters.dropFirst().first { $0.sections.count > 1 })
         markLearned([targetChapter.sections[0]])
 
         return (targetChapter.name, targetChapter.sections[1])

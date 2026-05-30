@@ -21,7 +21,7 @@ enum LearnFilter: Int {
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     weak var delegate: LearnViewController?
-    var filter = LearnFilter.all
+    var filter: LearnFilter = .all
 
     var filteredChapters: [Chapter] {
         guard filter != .all else { return Unwrap.chapters }
