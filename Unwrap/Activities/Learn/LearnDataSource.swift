@@ -32,7 +32,7 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    init(chapters: [Chapter] = Unwrap.chapters, user: User = User.current) {
+    init(chapters: [Chapter] = Unwrap.chapters, user: User = User.current ?? User()) {
         self.chapters = chapters
         self.user = user
         self.visibleChapters = chapters

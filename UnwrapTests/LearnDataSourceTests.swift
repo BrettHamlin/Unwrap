@@ -94,9 +94,12 @@ class LearnDataSourceTests: XCTestCase {
         let allCount = dataSource.numberOfSections(in: tableView)
         dataSource.filter = .notStarted
         let notStartedCount = dataSource.numberOfSections(in: tableView)
+        dataSource.filter = .all
+        let restoredAllCount = dataSource.numberOfSections(in: tableView)
 
         XCTAssertEqual(allCount, 1)
         XCTAssertEqual(notStartedCount, 0)
+        XCTAssertEqual(restoredAllCount, 1)
     }
 
     //harness:criterion=c-learn-filter-not-started-hides-learned-sections
