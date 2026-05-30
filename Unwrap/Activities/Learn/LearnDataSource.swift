@@ -8,21 +8,49 @@
 
 import UIKit
 
+enum LearnFilter: Equatable {
+    case all
+    case notStarted
+    case completed
+}
+
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
+    private struct FilteredChapter {
+        let chapter: Chapter
+        let sections: [String]
+    }
+
     weak var delegate: LearnViewController?
 
+    var filter: LearnFilter = .all {
+        didSet {
+            rebuildFilteredChapters()
+        }
+    }
+
+    private var filteredChapters = [FilteredChapter]()
+
+    override init() {
+        super.init()
+        rebuildFilteredChapters()
+    }
+
+    func refresh() {
+        rebuildFilteredChapters()
+    }
+
     func title(for indexPath: IndexPath) -> String {
-        return Unwrap.chapters[indexPath.section].sections[indexPath.row]
+        return filteredChapters[indexPath.section].sections[indexPath.row]
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Unwrap.chapters.count
+        return filteredChapters.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SectionHeader") as? DynamicHeightHeaderView {
-            headerView.headerLabel.text = Unwrap.chapters[section].name
+            headerView.headerLabel.text = filteredChapters[section].chapter.name
             return headerView
         } else {
             return nil
@@ -30,15 +58,14 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Unwrap.chapters[section].sections.count
+        return filteredChapters[section].sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.accessoryType = .disclosureIndicator
 
-        let chapter = Unwrap.chapters[indexPath.section]
-        let section = chapter.sections[indexPath.row]
+        let section = title(for: indexPath)
 
         cell.textLabel?.text = section
         cell.textLabel?.numberOfLines = 0
@@ -72,8 +99,38 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedChapter = Unwrap.chapters[indexPath.section]
-        let selectedSection = selectedChapter.sections[indexPath.row]
+        let selectedSection = title(for: indexPath)
         delegate?.startStudying(title: selectedSection)
+    }
+
+    private func rebuildFilteredChapters() {
+        if filter == .all {
+            filteredChapters = Unwrap.chapters.map {
+                FilteredChapter(chapter: $0, sections: $0.sections)
+            }
+
+            return
+        }
+
+        filteredChapters = Unwrap.chapters.compactMap { chapter in
+            let sections = chapter.sections.filter(sectionIsVisible)
+
+            guard sections.isEmpty == false else {
+                return nil
+            }
+
+            return FilteredChapter(chapter: chapter, sections: sections)
+        }
+    }
+
+    private func sectionIsVisible(_ section: String) -> Bool {
+        switch filter {
+        case .all:
+            return true
+        case .notStarted:
+            return User.current.hasLearned(section.bundleName) == false && User.current.hasReviewed(section.bundleName) == false
+        case .completed:
+            return User.current.hasLearned(section.bundleName) && User.current.hasReviewed(section.bundleName)
+        }
     }
 }

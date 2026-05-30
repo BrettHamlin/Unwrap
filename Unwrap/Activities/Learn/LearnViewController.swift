@@ -15,6 +15,8 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
 
+    private let filterControl = UISegmentedControl(items: ["All", "Not Started", "Completed"])
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,12 +34,14 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
+
+        configureFilterControl()
     }
 
-    /// Refreshes visible cells when the user changes.
+    /// Refreshes rows when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        dataSource.refresh()
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
@@ -59,5 +63,38 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    private func configureFilterControl() {
+        filterControl.selectedSegmentIndex = 0
+        filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
+
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+        headerView.backgroundColor = tableView.backgroundColor
+
+        filterControl.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(filterControl)
+
+        NSLayoutConstraint.activate([
+            filterControl.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 10),
+            filterControl.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -10),
+            filterControl.leadingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.leadingAnchor),
+            filterControl.trailingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.trailingAnchor)
+        ])
+
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc private func filterChanged() {
+        switch filterControl.selectedSegmentIndex {
+        case 1:
+            dataSource.filter = .notStarted
+        case 2:
+            dataSource.filter = .completed
+        default:
+            dataSource.filter = .all
+        }
+
+        tableView.reloadData()
     }
 }
