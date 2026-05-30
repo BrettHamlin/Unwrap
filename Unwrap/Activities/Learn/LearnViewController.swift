@@ -13,7 +13,9 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     var coordinator: LearnCoordinator?
 
     /// This handles all the rows in our table view.
-    let dataSource = LearnDataSource()
+    var dataSource = LearnDataSource()
+
+    let progressFilterControl = UISegmentedControl(items: ["All", "Not Started", "Completed"])
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,12 +34,18 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
+
+        configureProgressFilter()
     }
 
-    /// Refreshes visible cells when the user changes.
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateProgressFilterHeaderSize()
+    }
+
+    /// Refreshes visible sections when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        dataSource.applyFilter(dataSource.currentFilter)
     }
 
     func startStudying(title: String) {
@@ -59,5 +67,49 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    private func configureProgressFilter() {
+        progressFilterControl.selectedSegmentIndex = 0
+        progressFilterControl.addTarget(self, action: #selector(progressFilterChanged), for: .valueChanged)
+
+        let headerView = UIView()
+        progressFilterControl.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(progressFilterControl)
+
+        NSLayoutConstraint.activate([
+            progressFilterControl.leadingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.leadingAnchor),
+            progressFilterControl.trailingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.trailingAnchor),
+            progressFilterControl.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 12),
+            progressFilterControl.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -12)
+        ])
+
+        tableView.tableHeaderView = headerView
+        updateProgressFilterHeaderSize()
+    }
+
+    private func updateProgressFilterHeaderSize() {
+        guard let headerView = tableView.tableHeaderView else { return }
+
+        let headerWidth = tableView.bounds.width > 0 ? tableView.bounds.width : UIScreen.main.bounds.width
+        let fittingSize = CGSize(width: headerWidth, height: UIView.layoutFittingCompressedSize.height)
+        let headerHeight = headerView.systemLayoutSizeFitting(fittingSize, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
+        let headerSize = CGSize(width: headerWidth, height: headerHeight)
+
+        if headerView.frame.size != headerSize {
+            headerView.frame.size = headerSize
+            tableView.tableHeaderView = headerView
+        }
+    }
+
+    @objc func progressFilterChanged(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 1:
+            dataSource.applyFilter(.notStarted)
+        case 2:
+            dataSource.applyFilter(.completed)
+        default:
+            dataSource.applyFilter(.all)
+        }
     }
 }
