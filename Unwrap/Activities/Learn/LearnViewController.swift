@@ -15,6 +15,8 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
 
+    private let filterControl = UISegmentedControl(items: LearnFilterMode.allCases.map { $0.label })
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -30,14 +32,15 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
         tableView.addInteraction(UIContextMenuInteraction(delegate: self))
         dataSource.delegate = self
 
+        configureFilterControl()
+
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
     }
 
     /// Refreshes visible cells when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
@@ -59,5 +62,34 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    private func configureFilterControl() {
+        filterControl.selectedSegmentIndex = LearnFilterMode.allCases.firstIndex(of: dataSource.filterMode) ?? 0
+        filterControl.accessibilityLabel = "Learn filter"
+        filterControl.accessibilityValue = dataSource.filterMode.label
+        filterControl.addTarget(self, action: #selector(filterChanged(_:)), for: .valueChanged)
+
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+        headerView.addSubview(filterControl)
+
+        filterControl.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            filterControl.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 10),
+            filterControl.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -10),
+            filterControl.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 20),
+            filterControl.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -20)
+        ])
+
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc func filterChanged(_ sender: UISegmentedControl) {
+        guard LearnFilterMode.allCases.indices.contains(sender.selectedSegmentIndex) else { return }
+
+        dataSource.filterMode = LearnFilterMode.allCases[sender.selectedSegmentIndex]
+        sender.accessibilityValue = dataSource.filterMode.label
+        tableView.reloadData()
     }
 }
