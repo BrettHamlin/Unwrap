@@ -9,11 +9,13 @@
 import UIKit
 
 /// The main view controller you see in  the Home tab in the app.
-class LearnViewController: UITableViewController, UserTracking, UIContextMenuInteractionDelegate {
+class LearnViewController: UITableViewController, UserTracking, UIContextMenuInteractionDelegate, LearnDataSourceDelegate {
     var coordinator: LearnCoordinator?
 
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
+
+    private let progressFilterControl = UISegmentedControl(items: ["All", "Not Started", "Completed"])
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,6 +23,12 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
         assert(coordinator != nil, "You must set a coordinator before presenting this view controller.")
 
         title = "Learn"
+        progressFilterControl.selectedSegmentIndex = 0
+        progressFilterControl.accessibilityLabel = "Learn filter"
+        updateProgressFilterAccessibilityValue()
+        progressFilterControl.addTarget(self, action: #selector(progressFilterChanged), for: .valueChanged)
+        navigationItem.titleView = progressFilterControl
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Glossary", style: .plain, target: self, action: #selector(showGlossary))
         registerForUserChanges()
         extendedLayoutIncludesOpaqueBars = true
@@ -36,8 +44,8 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     /// Refreshes visible cells when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        dataSource.reloadVisibleChapters()
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
@@ -59,5 +67,23 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    @objc private func progressFilterChanged(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 1:
+            dataSource.currentFilter = .notStarted
+        case 2:
+            dataSource.currentFilter = .completed
+        default:
+            dataSource.currentFilter = .all
+        }
+
+        updateProgressFilterAccessibilityValue()
+        tableView.reloadData()
+    }
+
+    private func updateProgressFilterAccessibilityValue() {
+        progressFilterControl.accessibilityValue = progressFilterControl.titleForSegment(at: progressFilterControl.selectedSegmentIndex)
     }
 }

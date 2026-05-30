@@ -176,6 +176,7 @@
 		51CC13682065607C00F37A67 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51CC13662065607C00F37A67 /* Main.storyboard */; };
 		51CC136D2065607F00F37A67 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51CC136B2065607F00F37A67 /* LaunchScreen.storyboard */; };
 		51CC13782065607F00F37A67 /* UnwrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC13772065607F00F37A67 /* UnwrapTests.swift */; };
+		51CC137A2065607F00F37A67 /* LearnDataSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC137B2065607F00F37A67 /* LearnDataSourceTests.swift */; };
 		51CC1391206560A600F37A67 /* ShapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC1390206560A600F37A67 /* ShapeView.swift */; };
 		51CC13932065678A00F37A67 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC13922065678A00F37A67 /* WelcomeView.swift */; };
 		51CC1395206568DE00F37A67 /* UIBezierPath-Logo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC1394206568DE00F37A67 /* UIBezierPath-Logo.swift */; };
@@ -819,6 +820,7 @@
 		51CC136E2065607F00F37A67 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		51CC13732065607F00F37A67 /* UnwrapTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnwrapTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		51CC13772065607F00F37A67 /* UnwrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnwrapTests.swift; sourceTree = "<group>"; };
+		51CC137B2065607F00F37A67 /* LearnDataSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnDataSourceTests.swift; sourceTree = "<group>"; };
 		51CC13792065607F00F37A67 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		51CC1390206560A600F37A67 /* ShapeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeView.swift; sourceTree = "<group>"; };
 		51CC13922065678A00F37A67 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
@@ -1675,6 +1677,7 @@
 				51FA55D6211891C700C38188 /* CountedSetTests.swift */,
 				51FA55D2211879E100C38188 /* ExtensionTests.swift */,
 				17ACA09626DFBC6F00655C1B /* HomeDataSourceTests.swift */,
+				51CC137B2065607F00F37A67 /* LearnDataSourceTests.swift */,
 				51FA55C42117EC1A00C38188 /* PracticeTests.swift */,
 				51CC13772065607F00F37A67 /* UnwrapTests.swift */,
 				51FA55C821182C0900C38188 /* UserTests.swift */,
@@ -2956,6 +2959,7 @@
 				51FA55D7211891C700C38188 /* CountedSetTests.swift in Sources */,
 				51FA55C921182C0900C38188 /* UserTests.swift in Sources */,
 				51CC13782065607F00F37A67 /* UnwrapTests.swift in Sources */,
+				51CC137A2065607F00F37A67 /* LearnDataSourceTests.swift in Sources */,
 				51FA55C52117EC1B00C38188 /* PracticeTests.swift in Sources */,
 				51FA55D3211879E100C38188 /* ExtensionTests.swift in Sources */,
 				51FA55CB211838C500C38188 /* BadgeTests.swift in Sources */,
