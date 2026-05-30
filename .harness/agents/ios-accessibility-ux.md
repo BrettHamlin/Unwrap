@@ -54,6 +54,13 @@ remain in scope at warning/error severity when the reviewed diff supports them.
   inline action is added to a row/card/list item.
 - Navigation, sheet, popover, toolbar, retry, close, and destructive actions
   communicate what they affect.
+- Visible segmented controls, pickers, toolbar filters, and table-header filters
+  added by the diff have an explicit accessibility label for the control group
+  while preserving exact visible option labels. A standard `UISegmentedControl`
+  is a semantic control, but a header or navigation placement can still be
+  ambiguous to VoiceOver if the group itself is unnamed. Assume controls in
+  table headers, navigation items, or toolbars need explicit group context
+  unless nearby accessible text already names the control's purpose.
 - Dynamic Type, localization, right-to-left layout, and multiline content do
   not overlap, clip critical text, or hide primary actions.
 - VoiceOver order and focus remain coherent after modals, navigation pushes,
@@ -70,6 +77,9 @@ remain in scope at warning/error severity when the reviewed diff supports them.
 - **D/error:** a new interactive control lacks an accessible name, a gesture
   replaces a semantic control, touch targets materially shrink, Dynamic Type
   hides a required action, or focus/close behavior regresses.
+- **C/warning:** a new segmented control, picker, toolbar filter, or table-header
+  filter uses correct visible option labels but lacks a group accessibility label
+  or similarly clear VoiceOver context.
 - **C/warning:** minor copy, spacing, label specificity, or coverage issue
   proven by the provided diff/context.
 - **A:** no iOS accessibility or UX concerns in the diff.

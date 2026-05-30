@@ -64,6 +64,13 @@ scope at warning/error severity when the reviewed diff supports them.
   exposes both backing data and an emitted UI-state signal, generated tests must
   assert both; array-only assertions are not enough if the controller uses the
   signal to show empty, loading, error, or success UI.
+- UIKit controller refresh paths must be proven through observable product
+  state, not only through `reloadData()` call counts. If a notification,
+  delegate callback, pull-to-refresh, or `userDataChanged`-style method should
+  rebuild a data source, filter, section map, or selection mapping, tests should
+  mutate the underlying model/progress fixture, invoke the refresh path, and
+  assert the real data source's visible mapping changed. A reload-count-only
+  assertion can pass while stale state remains.
 - Generated tests for transient loading or failure states prefer deterministic
   unit, reducer, interactor, or view-model state tests over UI tests. Do not
   require or invent a new infinite-loading UI-test launch mode, a repository
@@ -147,6 +154,12 @@ scope at warning/error severity when the reviewed diff supports them.
   should verify both the data state and the emitted empty/success signal that
   UIKit controllers use to swap table, empty, loading, or error views. If the
   production signal is correct but tests miss it, grade the missing assertion C.
+- **UIKit refresh calibration:** grade C/warning when the implementation appears
+  to rebuild the requested data source or filter mapping, but the generated
+  tests only assert `reloadData()` or an equivalent UI invalidation call. Grade
+  D/error when the production refresh path itself leaves stale filtered rows,
+  section maps, selection targets, or navigation state after underlying user
+  progress/data changes.
 - **SwiftData hidden-query calibration:** for SwiftData `@Query`,
   `QueryViewContainer`, or hidden-query list shapes, do not C-grade solely
   because tests avoid rendered row/order inspection for a search/filter plus
