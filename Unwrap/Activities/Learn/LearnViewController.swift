@@ -38,6 +38,7 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     func configureFilterControl() {
         filterControl.selectedSegmentIndex = 0
+        dataSource.filter = .all
         filterControl.accessibilityLabel = "Learn filter"
         filterControl.accessibilityValue = filterControl.titleForSegment(at: filterControl.selectedSegmentIndex)
         filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
@@ -56,17 +57,12 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     }
 
     @objc func filterChanged() {
-        switch filterControl.selectedSegmentIndex {
-        case 1:
-            dataSource.filter = .notStarted
-        case 2:
-            dataSource.filter = .completed
-        default:
-            dataSource.filter = .all
-        }
-
+        dataSource.filter = LearnFilter(selectedSegmentIndex: filterControl.selectedSegmentIndex)
         filterControl.accessibilityValue = filterControl.titleForSegment(at: filterControl.selectedSegmentIndex)
-        tableView.reloadData()
+
+        if isViewLoaded {
+            tableView.reloadData()
+        }
     }
 
     /// Refreshes all cells when the user changes.

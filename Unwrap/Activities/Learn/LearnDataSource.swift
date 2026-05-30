@@ -8,10 +8,14 @@
 
 import UIKit
 
-enum LearnFilter {
+enum LearnFilter: Int {
     case all
     case notStarted
     case completed
+
+    init(selectedSegmentIndex: Int) {
+        self = LearnFilter(rawValue: selectedSegmentIndex) ?? .all
+    }
 }
 
 /// Manages all the rows in the Learn table view.

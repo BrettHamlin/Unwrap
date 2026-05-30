@@ -168,6 +168,7 @@ class LearnDataSourceTests: XCTestCase {
         XCTAssertEqual(control.selectedSegmentIndex, 0)
         XCTAssertEqual(control.accessibilityLabel, "Learn filter")
         XCTAssertEqual(control.accessibilityValue, "All")
+        XCTAssertTrue(control.actions(forTarget: viewController, forControlEvent: .valueChanged)?.contains("filterChanged") == true)
         XCTAssertEqual(viewController.navigationItem.rightBarButtonItem?.title, "Glossary")
     }
 
