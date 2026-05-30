@@ -35,6 +35,8 @@
 		511FD6AF2105EF220023E92C /* NewsArticle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6AE2105EF220023E92C /* NewsArticle.swift */; };
 		511FD6B12105F07A0023E92C /* URL-String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6B02105F07A0023E92C /* URL-String.swift */; };
 		511FD6B321065BF80023E92C /* Unwrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6B221065BF80023E92C /* Unwrap.swift */; };
+		511FD6C821065DDF0023E92C /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6C721065DDF0023E92C /* AppConfig.swift */; };
+		511FD6CA21065DDF0023E92C /* AppConfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 511FD6C921065DDF0023E92C /* AppConfig.json */; };
 		511FD6B621065CED0023E92C /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6B521065CED0023E92C /* HelpViewController.swift */; };
 		511FD6B821065D690023E92C /* HelpDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6B721065D690023E92C /* HelpDataSource.swift */; };
 		511FD6BA21073A6B0023E92C /* HelpItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511FD6B921073A6B0023E92C /* HelpItem.swift */; };
@@ -176,6 +178,7 @@
 		51CC13682065607C00F37A67 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51CC13662065607C00F37A67 /* Main.storyboard */; };
 		51CC136D2065607F00F37A67 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51CC136B2065607F00F37A67 /* LaunchScreen.storyboard */; };
 		51CC13782065607F00F37A67 /* UnwrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC13772065607F00F37A67 /* UnwrapTests.swift */; };
+		17ACF0A5265B3F2000655C1B /* AppConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17ACF0A4265B3F2000655C1B /* AppConfigTests.swift */; };
 		51CC1391206560A600F37A67 /* ShapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC1390206560A600F37A67 /* ShapeView.swift */; };
 		51CC13932065678A00F37A67 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC13922065678A00F37A67 /* WelcomeView.swift */; };
 		51CC1395206568DE00F37A67 /* UIBezierPath-Logo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC1394206568DE00F37A67 /* UIBezierPath-Logo.swift */; };
@@ -673,6 +676,8 @@
 		511FD6AE2105EF220023E92C /* NewsArticle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsArticle.swift; sourceTree = "<group>"; };
 		511FD6B02105F07A0023E92C /* URL-String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL-String.swift"; sourceTree = "<group>"; };
 		511FD6B221065BF80023E92C /* Unwrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unwrap.swift; sourceTree = "<group>"; };
+		511FD6C721065DDF0023E92C /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		511FD6C921065DDF0023E92C /* AppConfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = AppConfig.json; sourceTree = "<group>"; };
 		511FD6B521065CED0023E92C /* HelpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
 		511FD6B721065D690023E92C /* HelpDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpDataSource.swift; sourceTree = "<group>"; };
 		511FD6B921073A6B0023E92C /* HelpItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpItem.swift; sourceTree = "<group>"; };
@@ -842,6 +847,7 @@
 		51FA55C621181D2200C38188 /* CodeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeError.swift; sourceTree = "<group>"; };
 		51FA55C821182C0900C38188 /* UserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTests.swift; sourceTree = "<group>"; };
 		51FA55CA211838C500C38188 /* BadgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeTests.swift; sourceTree = "<group>"; };
+		17ACF0A4265B3F2000655C1B /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		51FA55CC211856DC00C38188 /* where-now.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "where-now.png"; sourceTree = "<group>"; };
 		51FA55CD211856DD00C38188 /* where-now.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "where-now.html"; sourceTree = "<group>"; };
 		51FA55D021186D6600C38188 /* where-now.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "where-now.json"; sourceTree = "<group>"; };
@@ -1658,6 +1664,8 @@
 				51CC13622065607C00F37A67 /* AppDelegate.swift */,
 				51B3A7C720CCC74B000ACA6D /* MainTabBarController.swift */,
 				51A90DC3227AFC060068A4F9 /* SplitViewControllerDelegate.swift */,
+				511FD6C721065DDF0023E92C /* AppConfig.swift */,
+				511FD6C921065DDF0023E92C /* AppConfig.json */,
 				511FD6B221065BF80023E92C /* Unwrap.swift */,
 				51CC13662065607C00F37A67 /* Main.storyboard */,
 				51CC136B2065607F00F37A67 /* LaunchScreen.storyboard */,
@@ -1669,6 +1677,7 @@
 		51CC13762065607F00F37A67 /* UnwrapTests */ = {
 			isa = PBXGroup;
 			children = (
+				17ACF0A4265B3F2000655C1B /* AppConfigTests.swift */,
 				51FA55CA211838C500C38188 /* BadgeTests.swift */,
 				51FA55D421187B6E00C38188 /* BundleLoadingTests.swift */,
 				51FA55C22117E32300C38188 /* ContentTests.swift */,
@@ -2319,6 +2328,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				51FE144820E25F1200F29889 /* arrays-vs-sets-vs-tuples.html in Resources */,
+				511FD6CA21065DDF0023E92C /* AppConfig.json in Resources */,
 				51FE13F820E25F1200F29889 /* operators-and-conditions-summary.mp4 in Resources */,
 				51FE146020E25F1200F29889 /* optionals-summary.png in Resources */,
 				51FE142E20E25F1200F29889 /* DarkTheme.css in Resources */,
@@ -2787,6 +2797,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				51A6D62420E651DA00FB6B46 /* TypeGenerating.swift in Sources */,
+				511FD6C821065DDF0023E92C /* AppConfig.swift in Sources */,
 				51A4476721089FF0005D8665 /* BadgeCollectionViewCell.swift in Sources */,
 				511FD6BA21073A6B0023E92C /* HelpItem.swift in Sources */,
 				514BF46A21E6691A00DE1483 /* GlossaryViewController.swift in Sources */,
@@ -2956,6 +2967,7 @@
 				51FA55D7211891C700C38188 /* CountedSetTests.swift in Sources */,
 				51FA55C921182C0900C38188 /* UserTests.swift in Sources */,
 				51CC13782065607F00F37A67 /* UnwrapTests.swift in Sources */,
+				17ACF0A5265B3F2000655C1B /* AppConfigTests.swift in Sources */,
 				51FA55C52117EC1B00C38188 /* PracticeTests.swift in Sources */,
 				51FA55D3211879E100C38188 /* ExtensionTests.swift in Sources */,
 				51FA55CB211838C500C38188 /* BadgeTests.swift in Sources */,

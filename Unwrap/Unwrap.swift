@@ -20,6 +20,9 @@ enum Unwrap {
     /// The URL where users can go to share this app.
     static let appURL = URL(staticString: "https://apps.apple.com/app/id1440611372")
 
+    /// Runtime-tunable values loaded from the app bundle.
+    static var config = Bundle.main.decode(AppConfig.self, from: "AppConfig.json")
+
     /// The static chapters for the app. These can be loaded up front – they never change while the app is running.
     static let chapters = Bundle.main.decode([Chapter].self, from: "Chapters.json")
 

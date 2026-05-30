@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var tabBarController: MainTabBarController?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        _ = Unwrap.config
 
         if #available(iOS 13, *) {
             window?.backgroundColor = .systemBackground

@@ -30,6 +30,23 @@ extension Bundle {
 
         return result
     }
+
+    /// Decodes one optional object type from a JSON filename stored in our bundle.
+    func decodeIfPresent<T: Decodable>(_ type: T.Type, from filename: String) -> T? {
+        guard let json = url(forResource: filename, withExtension: nil) else {
+            return nil
+        }
+
+        guard let jsonData = try? Data(contentsOf: json) else {
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        return try? decoder.decode(T.self, from: jsonData)
+    }
 }
 
 extension Data {
