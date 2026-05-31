@@ -13,7 +13,7 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     var coordinator: LearnCoordinator?
 
     /// This handles all the rows in our table view.
-    let dataSource = LearnDataSource()
+    var dataSource = LearnDataSource()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,15 +29,15 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
         tableView.delegate = dataSource
         tableView.addInteraction(UIContextMenuInteraction(delegate: self))
         dataSource.delegate = self
+        addFilterControl()
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
     }
 
-    /// Refreshes visible cells when the user changes.
+    /// Refreshes the table when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
@@ -59,5 +59,39 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    private func addFilterControl() {
+        let headerWidth = tableView.bounds.width > 0 ? tableView.bounds.width : UIScreen.main.bounds.width
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: headerWidth, height: 56))
+        headerView.autoresizingMask = [.flexibleWidth]
+
+        let filterControl = UISegmentedControl(items: ["All", "Not Started", "Completed"])
+        filterControl.selectedSegmentIndex = 0
+        filterControl.accessibilityLabel = "Learn filter"
+        filterControl.accessibilityValue = "All"
+        filterControl.addTarget(self, action: #selector(filterChanged(_:)), for: .valueChanged)
+        filterControl.frame = headerView.bounds.insetBy(dx: 16, dy: 10)
+        filterControl.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        headerView.addSubview(filterControl)
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc func filterChanged(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 1:
+            dataSource.filter = .notStarted
+        case 2:
+            dataSource.filter = .completed
+        default:
+            dataSource.filter = .all
+        }
+
+        if sender.selectedSegmentIndex >= 0 {
+            sender.accessibilityValue = sender.titleForSegment(at: sender.selectedSegmentIndex)
+        }
+
+        tableView.reloadData()
     }
 }
