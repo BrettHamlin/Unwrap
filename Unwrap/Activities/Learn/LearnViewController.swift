@@ -15,6 +15,8 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
 
+    private let filterControl = UISegmentedControl(items: LearnFilterMode.allCases.map { $0.label })
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,10 +34,27 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
+
+        configureFilterControl()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        guard let headerView = tableView.tableHeaderView, headerView.frame.width != tableView.bounds.width else { return }
+
+        headerView.frame.size.width = tableView.bounds.width
+        filterControl.frame = headerView.bounds.insetBy(dx: 16, dy: 10)
+        tableView.tableHeaderView = headerView
     }
 
     /// Refreshes visible cells when the user changes.
     func userDataChanged() {
+        guard dataSource.filterMode == .all else {
+            tableView.reloadData()
+            return
+        }
+
         guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
         tableView.reloadRows(at: indexPaths, with: .none)
     }
@@ -59,5 +78,29 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    private func configureFilterControl() {
+        filterControl.selectedSegmentIndex = dataSource.filterMode.rawValue
+        filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
+        filterControl.accessibilityLabel = "Learn filter"
+        filterControl.accessibilityValue = dataSource.filterMode.label
+
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+        headerView.backgroundColor = tableView.backgroundColor
+
+        filterControl.frame = headerView.bounds.insetBy(dx: 16, dy: 10)
+        filterControl.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
+        headerView.addSubview(filterControl)
+
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc private func filterChanged() {
+        guard let filterMode = LearnFilterMode(rawValue: filterControl.selectedSegmentIndex) else { return }
+
+        dataSource.filterMode = filterMode
+        filterControl.accessibilityValue = filterMode.label
+        tableView.reloadData()
     }
 }
