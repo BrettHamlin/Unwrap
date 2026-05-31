@@ -10,19 +10,72 @@ import UIKit
 
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
+    enum FilterMode: CaseIterable {
+        case all
+        case notStarted
+        case completed
+    }
+
+    struct VisibleChapter {
+        let chapterIndex: Int
+        let sectionIndices: [Int]
+    }
+
     weak var delegate: LearnViewController?
+    private(set) var visibleChapters: [VisibleChapter] = []
+
+    var filterMode = FilterMode.all {
+        didSet {
+            rebuildVisibleSections()
+        }
+    }
+
+    override init() {
+        super.init()
+        rebuildVisibleSections()
+    }
+
+    func rebuildVisibleSections() {
+        visibleChapters = Unwrap.chapters.enumerated().compactMap { chapterIndex, chapter in
+            let sectionIndices: [Int]
+
+            switch filterMode {
+            case .all:
+                sectionIndices = Array(chapter.sections.indices)
+            case .notStarted:
+                sectionIndices = chapter.sections.indices.filter {
+                    let section = chapter.sections[$0].bundleName
+                    return User.current.hasLearned(section) == false && User.current.hasReviewed(section) == false
+                }
+            case .completed:
+                sectionIndices = chapter.sections.indices.filter {
+                    let section = chapter.sections[$0].bundleName
+                    return User.current.hasLearned(section) && User.current.hasReviewed(section)
+                }
+            }
+
+            if filterMode != .all && sectionIndices.isEmpty {
+                return nil
+            } else {
+                return VisibleChapter(chapterIndex: chapterIndex, sectionIndices: sectionIndices)
+            }
+        }
+    }
 
     func title(for indexPath: IndexPath) -> String {
-        return Unwrap.chapters[indexPath.section].sections[indexPath.row]
+        let visibleChapter = visibleChapters[indexPath.section]
+        let sectionIndex = visibleChapter.sectionIndices[indexPath.row]
+        return Unwrap.chapters[visibleChapter.chapterIndex].sections[sectionIndex]
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Unwrap.chapters.count
+        return visibleChapters.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SectionHeader") as? DynamicHeightHeaderView {
-            headerView.headerLabel.text = Unwrap.chapters[section].name
+            let chapterIndex = visibleChapters[section].chapterIndex
+            headerView.headerLabel.text = Unwrap.chapters[chapterIndex].name
             return headerView
         } else {
             return nil
@@ -30,15 +83,14 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Unwrap.chapters[section].sections.count
+        return visibleChapters[section].sectionIndices.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.accessoryType = .disclosureIndicator
 
-        let chapter = Unwrap.chapters[indexPath.section]
-        let section = chapter.sections[indexPath.row]
+        let section = title(for: indexPath)
 
         cell.textLabel?.text = section
         cell.textLabel?.numberOfLines = 0
@@ -72,8 +124,7 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedChapter = Unwrap.chapters[indexPath.section]
-        let selectedSection = selectedChapter.sections[indexPath.row]
+        let selectedSection = title(for: indexPath)
         delegate?.startStudying(title: selectedSection)
     }
 }

@@ -15,6 +15,8 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
 
+    let progressFilter = UISegmentedControl(items: ["All", "Not Started", "Completed"])
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -30,14 +32,43 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
         tableView.addInteraction(UIContextMenuInteraction(delegate: self))
         dataSource.delegate = self
 
+        configureProgressFilter()
+
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
     }
 
-    /// Refreshes visible cells when the user changes.
+    func configureProgressFilter() {
+        progressFilter.selectedSegmentIndex = 0
+        progressFilter.accessibilityLabel = "Learn filter"
+        progressFilter.accessibilityValue = progressFilter.titleForSegment(at: progressFilter.selectedSegmentIndex)
+        progressFilter.addTarget(self, action: #selector(progressFilterChanged), for: .valueChanged)
+
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+        progressFilter.frame = CGRect(x: 16, y: 6, width: max(tableView.bounds.width - 32, 0), height: 44)
+        progressFilter.autoresizingMask = [.flexibleWidth]
+        headerView.addSubview(progressFilter)
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc func progressFilterChanged() {
+        switch progressFilter.selectedSegmentIndex {
+        case 1:
+            dataSource.filterMode = .notStarted
+        case 2:
+            dataSource.filterMode = .completed
+        default:
+            dataSource.filterMode = .all
+        }
+
+        progressFilter.accessibilityValue = progressFilter.titleForSegment(at: progressFilter.selectedSegmentIndex)
+        tableView.reloadData()
+    }
+
+    /// Refreshes the list when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        dataSource.rebuildVisibleSections()
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
