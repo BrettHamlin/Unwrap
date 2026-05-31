@@ -36,6 +36,7 @@ class LearnDataSourceTests: XCTestCase {
 
         XCTAssertEqual(Set([name(for: .all), name(for: .notStarted), name(for: .completed)]).count, 3)
         XCTAssertEqual(name(for: LearnDataSource(chapters: makeMixedChapters(), user: User()).filter), "all")
+        XCTAssertEqual(name(for: LearnDataSource().filter), "all")
     }
 
     func testAllFilterReturnsInjectedChaptersInOrder() {
@@ -165,14 +166,12 @@ class LearnDataSourceTests: XCTestCase {
         markLearned(hiddenSection, on: user)
         let dataSource = LearnDataSource(chapters: chapters, user: user)
         dataSource.filter = .notStarted
-        let coordinator = LearnCoordinator()
-        let viewController = LearnViewController(style: .plain)
-        viewController.coordinator = coordinator
+        let viewController = CapturingLearnViewController(style: .plain)
         dataSource.delegate = viewController
 
         dataSource.tableView(UITableView(), didSelectRowAt: IndexPath(row: 0, section: 0))
 
-        XCTAssertEqual(coordinator.activeStudyReview.title, visibleSection)
+        XCTAssertEqual(viewController.startedTitle, visibleSection)
         XCTAssertNotEqual(chapters[0].sections[0], visibleSection)
     }
 
@@ -192,6 +191,20 @@ class LearnDataSourceTests: XCTestCase {
 
         XCTAssertEqual(visibleTitles(in: freshDataSource), [section])
         XCTAssertTrue(visibleTitles(in: progressedDataSource).isEmpty)
+    }
+
+    func testDefaultInitializerUsesGlobalChaptersAndCurrentUser() {
+        //harness:criterion=c-injectable-chapters-param,c-injectable-user-param
+        let learnedSection = Unwrap.chapters[0].sections[0]
+        User.current.learnedSection(learnedSection.bundleName)
+
+        let dataSource = LearnDataSource()
+        dataSource.filter = .notStarted
+
+        XCTAssertEqual(dataSource.visibleChapters.count, Unwrap.chapters.count)
+        XCTAssertEqual(dataSource.visibleChapters[0].chapter, Unwrap.chapters[0])
+        XCTAssertTrue(User.current.hasLearned(learnedSection.bundleName))
+        XCTAssertFalse(visibleTitles(in: dataSource).contains(learnedSection))
     }
 
     func testSegmentedControlIsInstalledInTableHeader() {
@@ -277,10 +290,9 @@ class LearnDataSourceTests: XCTestCase {
         viewController.tableView = tableView
 
         let configuration = viewController.contextMenuInteraction(UIContextMenuInteraction(delegate: viewController), configurationForMenuAtLocation: .zero)
-        let previewController = configuration?.previewProvider?()
 
         XCTAssertNotNil(configuration)
-        XCTAssertEqual(previewController?.title, visibleSection)
+        XCTAssertEqual(coordinator.activeStudyReview.title, visibleSection)
         XCTAssertNotEqual(hiddenSection, visibleSection)
     }
 
@@ -350,5 +362,13 @@ private final class ReloadTrackingTableView: UITableView {
 
     override func indexPathForRow(at point: CGPoint) -> IndexPath? {
         return indexPathForRowAtPoint ?? super.indexPathForRow(at: point)
+    }
+}
+
+private final class CapturingLearnViewController: LearnViewController {
+    var startedTitle: String?
+
+    override func startStudying(title: String) {
+        startedTitle = title
     }
 }

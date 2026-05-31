@@ -63,7 +63,8 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     private func addFilterControl() {
         let headerWidth = tableView.bounds.width > 0 ? tableView.bounds.width : UIScreen.main.bounds.width
-        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: headerWidth, height: 56))
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: headerWidth, height: 0))
+        headerView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         headerView.autoresizingMask = [.flexibleWidth]
 
         let filterControl = UISegmentedControl(items: ["All", "Not Started", "Completed"])
@@ -71,10 +72,22 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
         filterControl.accessibilityLabel = "Learn filter"
         filterControl.accessibilityValue = "All"
         filterControl.addTarget(self, action: #selector(filterChanged(_:)), for: .valueChanged)
-        filterControl.frame = headerView.bounds.insetBy(dx: 16, dy: 10)
-        filterControl.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        filterControl.translatesAutoresizingMaskIntoConstraints = false
 
         headerView.addSubview(filterControl)
+
+        NSLayoutConstraint.activate([
+            filterControl.leadingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.leadingAnchor),
+            filterControl.trailingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.trailingAnchor),
+            filterControl.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
+            filterControl.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8),
+            filterControl.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+        ])
+
+        let fittingSize = CGSize(width: headerWidth, height: UIView.layoutFittingCompressedSize.height)
+        let headerHeight = headerView.systemLayoutSizeFitting(fittingSize, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height
+        headerView.frame.size.height = headerHeight
+
         tableView.tableHeaderView = headerView
     }
 
