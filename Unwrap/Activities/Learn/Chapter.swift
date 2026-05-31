@@ -9,11 +9,15 @@
 import UIKit
 
 /// One chapter of Swift in Sixty Seconds.
-struct Chapter: Decodable {
+struct Chapter: Decodable, Equatable {
     var name: String
     var sections: [String]
 
     lazy var bundleNameSections: [String] = {
         sections.map { $0.bundleName }
     }()
+
+    static func == (lhs: Chapter, rhs: Chapter) -> Bool {
+        return lhs.name == rhs.name && lhs.sections == rhs.sections
+    }
 }

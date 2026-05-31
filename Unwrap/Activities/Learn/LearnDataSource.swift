@@ -10,19 +10,73 @@ import UIKit
 
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
+    enum Filter: Equatable {
+        case all
+        case notStarted
+        case completed
+    }
+
     weak var delegate: LearnViewController?
 
+    let chapters: [Chapter]
+    private let fallbackUser = User()
+    private var injectedUser: User?
+    var user: User {
+        get {
+            return injectedUser ?? User.current ?? fallbackUser
+        }
+
+        set {
+            injectedUser = newValue
+        }
+    }
+
+    var filter = Filter.all
+
+    var visibleChapters: [(chapter: Chapter, sections: [String])] {
+        switch filter {
+        case .all:
+            return chapters.map { (chapter: $0, sections: $0.sections) }
+        case .notStarted:
+            return chapters.compactMap { chapter in
+                let sections = chapter.sections.filter { section in
+                    let bundleName = section.bundleName
+                    return user.hasLearned(bundleName) == false && user.hasReviewed(bundleName) == false
+                }
+
+                guard sections.isEmpty == false else { return nil }
+                return (chapter: chapter, sections: sections)
+            }
+        case .completed:
+            return chapters.compactMap { chapter in
+                let sections = chapter.sections.filter { section in
+                    let bundleName = section.bundleName
+                    return user.hasLearned(bundleName) && user.hasReviewed(bundleName)
+                }
+
+                guard sections.isEmpty == false else { return nil }
+                return (chapter: chapter, sections: sections)
+            }
+        }
+    }
+
+    init(chapters: [Chapter] = Unwrap.chapters, user: User? = nil) {
+        self.chapters = chapters
+        self.injectedUser = user
+        super.init()
+    }
+
     func title(for indexPath: IndexPath) -> String {
-        return Unwrap.chapters[indexPath.section].sections[indexPath.row]
+        return visibleChapters[indexPath.section].sections[indexPath.row]
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Unwrap.chapters.count
+        return visibleChapters.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SectionHeader") as? DynamicHeightHeaderView {
-            headerView.headerLabel.text = Unwrap.chapters[section].name
+            headerView.headerLabel.text = visibleChapters[section].chapter.name
             return headerView
         } else {
             return nil
@@ -30,22 +84,21 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Unwrap.chapters[section].sections.count
+        return visibleChapters[section].sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.accessoryType = .disclosureIndicator
 
-        let chapter = Unwrap.chapters[indexPath.section]
-        let section = chapter.sections[indexPath.row]
+        let section = title(for: indexPath)
 
         cell.textLabel?.text = section
         cell.textLabel?.numberOfLines = 0
 
         // Decide how to show the checkmark for this section.
 
-        let score = User.current.ratingForSection(section.bundleName)
+        let score = user.ratingForSection(section.bundleName)
 
         if score == 0 {
             // Always show a check image, but make it invisible
@@ -72,8 +125,6 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedChapter = Unwrap.chapters[indexPath.section]
-        let selectedSection = selectedChapter.sections[indexPath.row]
-        delegate?.startStudying(title: selectedSection)
+        delegate?.startStudying(title: title(for: indexPath))
     }
 }
