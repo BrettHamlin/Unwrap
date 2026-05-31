@@ -15,10 +15,10 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
 
+    private let filterControl = UISegmentedControl(items: ["All", "Not Started", "Completed"])
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        assert(coordinator != nil, "You must set a coordinator before presenting this view controller.")
 
         title = "Learn"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Glossary", style: .plain, target: self, action: #selector(showGlossary))
@@ -30,14 +30,15 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
         tableView.addInteraction(UIContextMenuInteraction(delegate: self))
         dataSource.delegate = self
 
+        configureFilterControl()
+
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
     }
 
     /// Refreshes visible cells when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
@@ -59,5 +60,45 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     @objc func showGlossary() {
         coordinator?.showGlossary()
+    }
+
+    private func configureFilterControl() {
+        filterControl.selectedSegmentIndex = 0
+        filterControl.accessibilityLabel = "Learn filter"
+        filterControl.accessibilityValue = "All"
+        filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
+
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+        headerView.autoresizingMask = [.flexibleWidth]
+
+        filterControl.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(filterControl)
+
+        NSLayoutConstraint.activate([
+            filterControl.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            filterControl.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
+            filterControl.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 10),
+            filterControl.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -10)
+        ])
+
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc private func filterChanged() {
+        switch filterControl.selectedSegmentIndex {
+        case 1:
+            dataSource.filter = .notStarted
+            filterControl.accessibilityValue = "Not Started"
+
+        case 2:
+            dataSource.filter = .completed
+            filterControl.accessibilityValue = "Completed"
+
+        default:
+            dataSource.filter = .all
+            filterControl.accessibilityValue = "All"
+        }
+
+        tableView.reloadData()
     }
 }
