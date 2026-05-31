@@ -8,21 +8,75 @@
 
 import UIKit
 
+enum LearnProgressFilter: CaseIterable {
+    case all
+    case notStarted
+    case completed
+
+    var label: String {
+        switch self {
+        case .all:
+            return "All"
+        case .notStarted:
+            return "Not Started"
+        case .completed:
+            return "Completed"
+        }
+    }
+}
+
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     weak var delegate: LearnViewController?
+    var activeFilter = LearnProgressFilter.all {
+        didSet {
+            updateFilteredChapters()
+        }
+    }
+
+    private(set) var filteredChapters = [(chapter: Chapter, sections: [String])]()
+
+    override init() {
+        super.init()
+        updateFilteredChapters()
+    }
 
     func title(for indexPath: IndexPath) -> String {
-        return Unwrap.chapters[indexPath.section].sections[indexPath.row]
+        return filteredChapters[indexPath.section].sections[indexPath.row]
+    }
+
+    func updateFilteredChapters() {
+        filteredChapters = Unwrap.chapters.compactMap { chapter in
+            let sections = chapter.sections.filter { sectionIsVisible($0) }
+
+            if activeFilter == .all || sections.isEmpty == false {
+                return (chapter: chapter, sections: sections)
+            } else {
+                return nil
+            }
+        }
+    }
+
+    private func sectionIsVisible(_ section: String) -> Bool {
+        switch activeFilter {
+        case .all:
+            return true
+        case .notStarted:
+            guard let user = User.current else { return true }
+            return !user.hasLearned(section.bundleName) && !user.hasReviewed(section.bundleName)
+        case .completed:
+            guard let user = User.current else { return false }
+            return user.hasLearned(section.bundleName) && user.hasReviewed(section.bundleName)
+        }
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Unwrap.chapters.count
+        return filteredChapters.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SectionHeader") as? DynamicHeightHeaderView {
-            headerView.headerLabel.text = Unwrap.chapters[section].name
+            headerView.headerLabel.text = filteredChapters[section].chapter.name
             return headerView
         } else {
             return nil
@@ -30,22 +84,21 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Unwrap.chapters[section].sections.count
+        return filteredChapters[section].sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.accessoryType = .disclosureIndicator
 
-        let chapter = Unwrap.chapters[indexPath.section]
-        let section = chapter.sections[indexPath.row]
+        let section = filteredChapters[indexPath.section].sections[indexPath.row]
 
         cell.textLabel?.text = section
         cell.textLabel?.numberOfLines = 0
 
         // Decide how to show the checkmark for this section.
 
-        let score = User.current.ratingForSection(section.bundleName)
+        let score = User.current?.ratingForSection(section.bundleName) ?? 0
 
         if score == 0 {
             // Always show a check image, but make it invisible
@@ -72,8 +125,7 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedChapter = Unwrap.chapters[indexPath.section]
-        let selectedSection = selectedChapter.sections[indexPath.row]
+        let selectedSection = filteredChapters[indexPath.section].sections[indexPath.row]
         delegate?.startStudying(title: selectedSection)
     }
 }

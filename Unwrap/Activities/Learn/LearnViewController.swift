@@ -14,6 +14,7 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
+    let progressFilterControl = UISegmentedControl(items: LearnProgressFilter.allCases.map { $0.label })
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,12 +33,44 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
+
+        configureProgressFilterControl()
     }
 
-    /// Refreshes visible cells when the user changes.
+    private func configureProgressFilterControl() {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+
+        progressFilterControl.selectedSegmentIndex = LearnProgressFilter.allCases.firstIndex(of: dataSource.activeFilter) ?? 0
+        progressFilterControl.accessibilityLabel = "Learn filter"
+        progressFilterControl.accessibilityValue = dataSource.activeFilter.label
+        progressFilterControl.addTarget(self, action: #selector(progressFilterChanged), for: .valueChanged)
+        progressFilterControl.translatesAutoresizingMaskIntoConstraints = false
+
+        headerView.addSubview(progressFilterControl)
+
+        NSLayoutConstraint.activate([
+            progressFilterControl.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            progressFilterControl.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
+            progressFilterControl.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 10),
+            progressFilterControl.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -10)
+        ])
+
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc func progressFilterChanged(_ sender: UISegmentedControl) {
+        guard LearnProgressFilter.allCases.indices.contains(sender.selectedSegmentIndex) else { return }
+
+        let filter = LearnProgressFilter.allCases[sender.selectedSegmentIndex]
+        dataSource.activeFilter = filter
+        sender.accessibilityValue = filter.label
+        tableView.reloadData()
+    }
+
+    /// Refreshes table rows and sections when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        dataSource.updateFilteredChapters()
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {
