@@ -14,6 +14,7 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
     /// This handles all the rows in our table view.
     let dataSource = LearnDataSource()
+    let filterControl = UISegmentedControl(items: LearnFilter.allCases.map { $0.title })
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,12 +33,43 @@ class LearnViewController: UITableViewController, UserTracking, UIContextMenuInt
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(DynamicHeightHeaderView.self, forHeaderFooterViewReuseIdentifier: "SectionHeader")
+
+        configureFilterControl()
     }
 
-    /// Refreshes visible cells when the user changes.
+    func configureFilterControl() {
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 56))
+
+        filterControl.selectedSegmentIndex = LearnFilter.all.rawValue
+        filterControl.accessibilityLabel = "Learn filter"
+        filterControl.accessibilityValue = LearnFilter.all.title
+        filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
+        filterControl.translatesAutoresizingMaskIntoConstraints = false
+
+        headerView.addSubview(filterControl)
+
+        NSLayoutConstraint.activate([
+            filterControl.leadingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.leadingAnchor),
+            filterControl.trailingAnchor.constraint(equalTo: headerView.layoutMarginsGuide.trailingAnchor),
+            filterControl.centerYAnchor.constraint(equalTo: headerView.centerYAnchor)
+        ])
+
+        tableView.tableHeaderView = headerView
+    }
+
+    @objc func filterChanged() {
+        guard let filter = LearnFilter(rawValue: filterControl.selectedSegmentIndex) else {
+            return
+        }
+
+        dataSource.currentFilter = filter
+        filterControl.accessibilityValue = filter.title
+        tableView.reloadData()
+    }
+
+    /// Refreshes all cells when the user changes.
     func userDataChanged() {
-        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
-        tableView.reloadRows(at: indexPaths, with: .none)
+        tableView.reloadData()
     }
 
     func startStudying(title: String) {

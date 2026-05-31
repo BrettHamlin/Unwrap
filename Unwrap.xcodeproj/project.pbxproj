@@ -171,6 +171,7 @@
 		51C5642720CCBAB40093030C /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C5642620CCBAB40093030C /* StatusView.swift */; };
 		51C5642920CCC2520093030C /* LearnDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C5642820CCC2520093030C /* LearnDataSource.swift */; };
 		51C5642D20CCC5480093030C /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C5642C20CCC5480093030C /* Chapter.swift */; };
+		A0F1D0012DDE000000000002 /* LearnDataSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F1D0012DDE000000000001 /* LearnDataSourceTests.swift */; };
 		51CC13632065607C00F37A67 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC13622065607C00F37A67 /* AppDelegate.swift */; };
 		51CC13652065607C00F37A67 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CC13642065607C00F37A67 /* WelcomeViewController.swift */; };
 		51CC13682065607C00F37A67 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51CC13662065607C00F37A67 /* Main.storyboard */; };
@@ -811,6 +812,7 @@
 		51C5642620CCBAB40093030C /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
 		51C5642820CCC2520093030C /* LearnDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnDataSource.swift; sourceTree = "<group>"; };
 		51C5642C20CCC5480093030C /* Chapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chapter.swift; sourceTree = "<group>"; };
+		A0F1D0012DDE000000000001 /* LearnDataSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnDataSourceTests.swift; sourceTree = "<group>"; };
 		51CC135F2065607C00F37A67 /* Unwrap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unwrap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51CC13622065607C00F37A67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51CC13642065607C00F37A67 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
@@ -1675,6 +1677,7 @@
 				51FA55D6211891C700C38188 /* CountedSetTests.swift */,
 				51FA55D2211879E100C38188 /* ExtensionTests.swift */,
 				17ACA09626DFBC6F00655C1B /* HomeDataSourceTests.swift */,
+				A0F1D0012DDE000000000001 /* LearnDataSourceTests.swift */,
 				51FA55C42117EC1A00C38188 /* PracticeTests.swift */,
 				51CC13772065607F00F37A67 /* UnwrapTests.swift */,
 				51FA55C821182C0900C38188 /* UserTests.swift */,
@@ -2955,6 +2958,7 @@
 				17ACA09726DFBC6F00655C1B /* HomeDataSourceTests.swift in Sources */,
 				51FA55D7211891C700C38188 /* CountedSetTests.swift in Sources */,
 				51FA55C921182C0900C38188 /* UserTests.swift in Sources */,
+				A0F1D0012DDE000000000002 /* LearnDataSourceTests.swift in Sources */,
 				51CC13782065607F00F37A67 /* UnwrapTests.swift in Sources */,
 				51FA55C52117EC1B00C38188 /* PracticeTests.swift in Sources */,
 				51FA55D3211879E100C38188 /* ExtensionTests.swift in Sources */,
