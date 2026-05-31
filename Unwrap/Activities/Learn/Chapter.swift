@@ -16,4 +16,9 @@ struct Chapter: Decodable {
     lazy var bundleNameSections: [String] = {
         sections.map { $0.bundleName }
     }()
+
+    init(name: String, sections: [String]) {
+        self.name = name
+        self.sections = sections
+    }
 }

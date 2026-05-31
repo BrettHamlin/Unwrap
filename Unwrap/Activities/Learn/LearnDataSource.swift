@@ -10,19 +10,45 @@ import UIKit
 
 /// Manages all the rows in the Learn table view.
 class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
+    enum FilterMode: CaseIterable, Equatable {
+        case all
+        case notStarted
+        case completed
+    }
+
     weak var delegate: LearnViewController?
+    private let userProvider: () -> User
+    var user: User { userProvider() }
+    private(set) var visibleChapters = [Chapter]()
+
+    var activeFilter = FilterMode.all {
+        didSet {
+            updateVisibleChapters()
+        }
+    }
+
+    init(user: User? = nil) {
+        if let user = user {
+            userProvider = { user }
+        } else {
+            userProvider = { User.current ?? User() }
+        }
+
+        super.init()
+        updateVisibleChapters()
+    }
 
     func title(for indexPath: IndexPath) -> String {
-        return Unwrap.chapters[indexPath.section].sections[indexPath.row]
+        return visibleChapters[indexPath.section].sections[indexPath.row]
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Unwrap.chapters.count
+        return visibleChapters.count
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "SectionHeader") as? DynamicHeightHeaderView {
-            headerView.headerLabel.text = Unwrap.chapters[section].name
+            headerView.headerLabel.text = visibleChapters[section].name
             return headerView
         } else {
             return nil
@@ -30,14 +56,14 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Unwrap.chapters[section].sections.count
+        return visibleChapters[section].sections.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.accessoryType = .disclosureIndicator
 
-        let chapter = Unwrap.chapters[indexPath.section]
+        let chapter = visibleChapters[indexPath.section]
         let section = chapter.sections[indexPath.row]
 
         cell.textLabel?.text = section
@@ -45,7 +71,7 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
 
         // Decide how to show the checkmark for this section.
 
-        let score = User.current.ratingForSection(section.bundleName)
+        let score = user.ratingForSection(section.bundleName)
 
         if score == 0 {
             // Always show a check image, but make it invisible
@@ -72,8 +98,31 @@ class LearnDataSource: NSObject, UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedChapter = Unwrap.chapters[indexPath.section]
-        let selectedSection = selectedChapter.sections[indexPath.row]
-        delegate?.startStudying(title: selectedSection)
+        delegate?.startStudying(title: title(for: indexPath))
+    }
+
+    func updateVisibleChapters() {
+        if activeFilter == .all {
+            visibleChapters = Unwrap.chapters
+            return
+        }
+
+        visibleChapters = Unwrap.chapters.compactMap { chapter in
+            let sections = chapter.sections.filter { section in
+                let bundleName = section.bundleName
+
+                switch activeFilter {
+                case .notStarted:
+                    return user.hasLearned(bundleName) == false && user.hasReviewed(bundleName) == false
+                case .completed:
+                    return user.hasLearned(bundleName) && user.hasReviewed(bundleName)
+                case .all:
+                    return true
+                }
+            }
+
+            guard sections.isEmpty == false else { return nil }
+            return Chapter(name: chapter.name, sections: sections)
+        }
     }
 }
